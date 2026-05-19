@@ -28,5 +28,25 @@ Generated on: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 """
 
     file_path.write_text(markdown_content, encoding="utf-8")
-
     return str(file_path)
+
+
+def list_summaries():
+    SUMMARY_DIR.mkdir(exist_ok=True)
+    files = sorted(SUMMARY_DIR.glob("*.md"), reverse=True)
+
+    summaries = []
+
+    for file in files:
+        content = file.read_text(encoding="utf-8")
+        first_line = content.splitlines()[0] if content else "# Untitled"
+        title = first_line.replace("#", "").strip()
+
+        summaries.append({
+            "title": title,
+            "filename": file.name,
+            "path": str(file),
+            "content": content
+        })
+
+    return summaries
