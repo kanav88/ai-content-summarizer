@@ -1,4 +1,5 @@
 import streamlit as st
+from services.storage import save_summary
 from services.summarizer import summarize_content
 from services.youtube_service import get_transcript
 
@@ -14,6 +15,11 @@ st.caption("Summarize podcasts, transcripts, articles, notes, and long text loca
 input_mode = st.radio(
     "Choose Input Type",
     ["Paste Text", "YouTube URL"]
+)
+
+summary_title = st.text_input(
+    "Summary title",
+    placeholder="Example: AI podcast episode summary"
 )
 
 if input_mode == "Paste Text":
@@ -64,6 +70,19 @@ if st.button("Summarize"):
             result = summarize_content(content, tone, output_type)
 
         st.markdown(result)
+
+        final_title = summary_title.strip() or "Untitled Summary"
+
+        saved_path = save_summary(final_title, result)
+
+        st.success(f"Summary saved to: {saved_path}")
+
+        st.download_button(
+            label="Download Summary as Markdown",
+            data=f"# {final_title}\n\n{result}",
+            file_name=f"{final_title.lower().replace(' ', '_')}.md",
+            mime="text/markdown"
+        )
 
     except Exception as e:
         st.error(f"Something went wrong: {e}")
