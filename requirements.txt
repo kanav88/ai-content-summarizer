@@ -1,3 +1,5 @@
 streamlit
 requests
 youtube-transcript-api
+chromadb
+sentence-transformers

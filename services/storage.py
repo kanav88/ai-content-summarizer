@@ -1,6 +1,7 @@
 from datetime import datetime
 from pathlib import Path
 import re
+from services.vector_store import add_summary_to_vector_db
 
 SUMMARY_DIR = Path("summaries")
 
@@ -28,6 +29,11 @@ Generated on: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 """
 
     file_path.write_text(markdown_content, encoding="utf-8")
+    add_summary_to_vector_db(
+        title=title,
+        content=content,
+        file_name=filename
+    )
     return str(file_path)
 
 

@@ -2,6 +2,7 @@ import streamlit as st
 from services.summarizer import summarize_content
 from services.youtube_service import get_transcript
 from services.storage import save_summary, list_summaries
+from services.vector_store import semantic_search
 
 st.set_page_config(
     page_title="AI Content Summarizer",
@@ -189,6 +190,11 @@ else:
     if not summaries:
         st.info("No summaries saved yet.")
     else:
+        search_mode = st.radio(
+            "Search Type",
+            ["Keyword Search", "Semantic Search"]
+        )
+
         search_query = st.text_input(
             "Search summaries",
             placeholder="Search by title or content..."
@@ -197,12 +203,21 @@ else:
         filtered_summaries = summaries
 
         if search_query.strip():
-            query = search_query.lower()
-            filtered_summaries = [
-                summary for summary in summaries
-                if query in summary["title"].lower()
-                or query in summary["content"].lower()
-            ]
+            if search_mode == "Keyword Search":
+                query = search_query.lower()
+                filtered_summaries = [
+                    summary for summary in summaries
+                    if query in summary["title"].lower()
+                    or query in summary["content"].lower()
+                ]
+            else:
+                results = semantic_search(search_query)
+                matched_ids = results["ids"][0]
+
+                filtered_summaries = [
+                    summary for summary in summaries
+                    if summary["filename"] in matched_ids
+                ]
 
         st.write(f"Showing {len(filtered_summaries)} summaries")
 
