@@ -49,7 +49,11 @@ st.markdown("""
 with st.sidebar:
     page = st.radio(
         "Navigation",
-        ["Create Summary", "Summary Library"]
+        [
+            "Create Summary",
+            "Summary Library",
+            "Chat With Summaries"
+        ]
     )
 
     st.divider()
@@ -181,7 +185,7 @@ if page == "Create Summary":
         except Exception as e:
             st.error(f"Something went wrong: {e}")
 
-else:
+elif page == "Summary Library":
     st.markdown("## 📚 Summary Library")
     st.caption("Browse your locally saved AI summaries.")
 
@@ -233,3 +237,30 @@ else:
                     mime="text/markdown",
                     key=summary["filename"]
                 )
+
+elif page == "Chat With Summaries":
+    from services.rag_chat import ask_question
+
+    st.markdown("## 🤖 Chat With Your Summaries")
+    st.caption("Ask questions across your saved knowledge base.")
+
+    question = st.text_input(
+        "Ask a question",
+        placeholder="What AI trends appeared across my summaries?"
+    )
+
+    if st.button("Ask AI"):
+        if not question.strip():
+            st.warning("Please enter a question.")
+            st.stop()
+
+        with st.spinner("Searching summaries and generating answer..."):
+            result = ask_question(question)
+
+        st.markdown("### 🧠 AI Answer")
+        st.markdown(result["answer"])
+
+        st.markdown("### 📚 Sources Used")
+
+        for source in result["sources"]:
+            st.markdown(f"- {source['title']}")
